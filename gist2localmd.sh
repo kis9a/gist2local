@@ -1,8 +1,9 @@
 #!/bin/bash
 
-exec_mode='test' # 'production' or 'test'
+exec_mode='production' # 'production' or 'test'
 mock_file='./gists.json'
 output_dir='./gists'
+get_gists=`curl -u $1 https://api.github.com/users/$2/gists`
 
 ## read gists
 if [ $exec_mode = 'test' ] ; then
@@ -10,11 +11,11 @@ if [ $exec_mode = 'test' ] ; then
     gists=$(cat $mock_file)
   else
     echo 'not mock files'
-    gists=$(curl -u kis9a https://api.github.com/users/kis9a/gists -o $mock_file)
+    gists=$($get_gists -o $mock_file)
     gists=$(cat $mock_file)
   fi
 elif [ $exec_mode = 'production' ] ; then
-  gists=$(curl -u kis9a https://api.github.com/users/kis9a/gists)
+  gists=$($get_gists)
 else
   echo 'ERROR: set correct status'
   exit 1

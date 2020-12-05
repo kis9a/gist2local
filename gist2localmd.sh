@@ -1,36 +1,38 @@
 #!/bin/bash
 
-exec_mode='production' # 'production' or 'test'
+exec_mode='test' # 'production' or 'test'
 mock_file='./gists.json'
 output_dir='./gists'
-get_gists=`curl -u $1 https://api.github.com/users/$2/gists`
 
-## read gists
-if [ $exec_mode = 'test' ] ; then
-  if [ -f $mock_file ] ; then
-    gists=$(cat $mock_file)
-  else
-    echo 'not mock files'
-    gists=$($get_gists -o $mock_file)
-    gists=$(cat $mock_file)
-  fi
-elif [ $exec_mode = 'production' ] ; then
-  gists=$($get_gists)
-else
+# check exec_mode status
+if [ $exec_mode != 'production' -a $exec_mode != 'test' ] ; then
   echo 'ERROR: set correct status'
   exit 1
 fi
 
-echo $gists
-
-## set output directory
-if [ -d $output_dir ] ; then
-  $(rm $output_dir/*)
+## read gists or mock_file
+if [ $exec_mode = 'test' ] ; then
+  if [ -f $mock_file ] ; then
+    gists=$(cat $mock_file)
+  else
+    echo 'dont exit mock files, get gists and output mock_file'
+    $(curl -u $1 https://api.github.com/users/$2/gists -o $mock_file)
+    gists=$(cat $mock_file)
+  fi
 else
-  $(mkdir $output_dir )
+  gists=$(curl -u $1 https://api.github.com/users/$2/gists)
 fi
 
-gists_length=$(echo $gists | jq length)
+## set output directory
+$(rm -rf $output_dir) && $(mkdir $output_dir)
+
+## set get gist_files times set. if exec_mode='test' will get 2 times get
+if [ $exec_mode = 'test' ]  ; then
+  gists_length=2
+else
+  gists_length=$(echo $gists | jq length)
+fi
+
 
 ## gists export local markdown files
 for i in $( seq 0 $(($gists_length - 1))); do

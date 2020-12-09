@@ -4,15 +4,6 @@
 
 export the github gists of specified user to a local markdown file.
 
-```
-.
-├── README.md
-├── gist2localmd.sh
-├── gists
-   ├── test1.md
-   └── test2.md
-```
-
 ### Required
 
 - **curl** - https://github.com/curl/curl

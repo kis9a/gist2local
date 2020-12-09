@@ -26,7 +26,7 @@ fi
 ## set output directory
 $(rm -rf $output_dir) && $(mkdir $output_dir)
 
-## set get gist_files times set. if exec_mode='test' will get 2 times get
+## set get gist_files times. if exec_mode='test' will get 2 times get
 if [ $exec_mode = 'test' ]  ; then
   declare -i gists_length=2
 else

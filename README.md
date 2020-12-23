@@ -1,41 +1,24 @@
-# Gist2localmd
+# gist2localmd
 
-### Summary
+### required
 
-export the github gists of specified user to a local markdown file.
+- [jq](https://stedolan.github.io/jq/)  
+- [curl](https://github.com/curl/curl)
 
-### Required
+### useage
 
-- **curl** - https://github.com/curl/curl
-- **jq** https://stedolan.github.io/jq/
-
-### Useage
-
-```bash
-git clone https://github.com/kis9a/gist2localmd
-cd gist2localmd
+```sh
 sh ./gist2localmd.sh $auth_user $target_user
-
-#example
-sh ./gist2localmd.sh kis9a kis9a
 ```
 
-### Reference
+### reference
 
-##### Github api overview
+- ##### github api overview
+  - https://developer.github.com/v3/gists/
+  - https://developer.github.com/v3/#rate-limiting
+  - https://developer.github.com/v3/auth/#via-oauth-and-personal-access-tokens
 
-✅ Checkout
-
-- https://api.github.com/
-- https://api.github.com/users/kis9a
-- https://api.github.com/users/kis9a/gists
-- https://developer.github.com/v3/gists/
-- https://developer.github.com/v3/#rate-limiting
-- https://developer.github.com/v3/auth/#via-oauth-and-personal-access-tokens
-
-##### Parse Json with jq
-
-✅ Checkout
-
-- https://stedolan.github.io/jq/
-- https://qiita.com/ryo0301/items/2ac9d11f355f1cf52ea5
+- ##### response example
+  - https://api.github.com/
+  - https://api.github.com/users/kis9a
+  - https://api.github.com/users/kis9a/gists

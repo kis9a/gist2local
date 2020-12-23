@@ -4,13 +4,13 @@ exec_mode='production' # 'production' or 'test'
 mock_file='./gists.json'
 output_dir='./gists'
 
-# check exec_mode status
+# check exec_mode
 if [ $exec_mode != 'production' -a $exec_mode != 'test' ] ; then
   echo 'ERROR: set correct status'
   exit 1
 fi
 
-## read gists or mock_file
+## GET gists or read mock_file
 if [ $exec_mode = 'test' ] ; then
   if [ -f $mock_file ] ; then
     declare -a gists=$(cat $mock_file)
@@ -26,7 +26,7 @@ fi
 ## set output directory
 $(rm -rf $output_dir) && $(mkdir $output_dir)
 
-## set get gist_files times. if exec_mode='test' will get 2 times get
+## set gist_files getting times. if exec_mode='test' will two times get
 if [ $exec_mode = 'test' ]  ; then
   declare -i gists_length=2
 else

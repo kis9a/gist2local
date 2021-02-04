@@ -151,6 +151,7 @@ get_user_gists_json() {
       err "First argument 'auth_user' is not supplied"
       exit 1
     fi
+
     if [ -z "$2" ]; then
       showhelp
       err "Second arguments 'target_user' is not supplied"
@@ -160,10 +161,13 @@ get_user_gists_json() {
     # check is exit curl command
     if is_exists "curl"; then
       curl -s -u "$1" https://api.github.com/users/"$2"/gists -o $gists_json_file
+    else
+      err "required: curl command. installed?"
+      info "https://github.com/curl/curl"
     fi
 
     # check isexit outputed file
-    if [ -e $gists_json_file ]; then
+    if [ -e "$gists_json_file" ]; then
       succ 'Created user gists json file'
     else
       err "Can't created user gist json file"
@@ -172,36 +176,64 @@ get_user_gists_json() {
   fi
 }
 
-gist_to_local() {
-
-  # TODO
-  # clone with git
-  # filetype filleter
-
-  ## set output directory
-  rm -rf "$gists_output_directory"
-  mkdir "$gists_output_directory"
-
-  # check isexit and read json file
-  if [ -e $gists_json_file ]; then
-    gists=$(jq "." < "$gists_json_file")
+set_dir() {
+  if [ ! -d  "$1" ]; then
+    mkdir "$1"
   else
-    err "can't source gist json file"
-    exit
+    if [ -n "$(ls -A "$1")" ]; then
+      warn "exit files in '$1' directory. Delete ?"
+      read -r -n1 -p "ok? (Y/N): " yn
+      if [[ $yn = [yY] ]]; then
+        rm -rf "$1"
+        mkdir "$1"
+        echo ''
+        succ "set '$1' directory"
+      else
+        echo ''
+        err "Can't set '$1' directory"
+        exit
+      fi
+    fi
   fi
+}
 
-  # parse to array of file_objs
-  gist_file_objs=$(echo "$gists" | jq ".[] .files|to_entries[]|.value" | jq -s)
-  echo $gist_file_objs
+gist_to_local() {
+  if $is_debug; then
+      : # write your debug code
+  else
+    ## configure output directory
+    set_dir "$gists_output_directory"
 
-  # download with curl by get filename and raw_url
-  for num in $( seq 1 "$(echo "$gist_file_objs" | jq length)"); do
-    filename=$(echo "$gist_file_objs" | jq -r .["$num]|.filename")
-    raw_url=$(echo "$gist_file_objs" | jq -r .["$num]|.raw_url")
+    # check isexit and read json file
+    if [ -e $gists_json_file ]; then
+      gists=$(jq "." < "$gists_json_file")
+    else
+      err "can't source gist json file"
+      exit
+    fi
 
-    echo "$raw_url" "$gists_output_directory"/"$filename"
-    curl -s "$raw_url" -o "$gists_output_directory"/"$filename"
-  done
+    # parse to array of file_objs
+    gist_file_objs=$(echo "$gists" | jq ".[] .files|to_entries[]|.value" | jq -s)
+
+    # check is exit jq command
+    if is_exists "jq"; then
+      # download with curl and output files
+      for num in $( seq 1 "$(echo "$gist_file_objs" | jq length)"); do
+        filename=$(echo "$gist_file_objs" | jq -r .["$num]|.filename")
+        raw_url=$(echo "$gist_file_objs" | jq -r .["$num]|.raw_url")
+
+        curl "-#" "$raw_url" -o "$gists_output_directory"/"$filename"
+      done
+    else
+      err "required: curl command. installed?"
+      info "https://github.com/stedolan/jq"
+    fi
+
+    if [ -n "$(ls -A "$gists_output_directory")" ]; then
+      succ "Success download files!"
+      succ "check '$gists_output_directory' directory"
+    fi
+  fi
 }
 
 main() {

@@ -1,6 +1,6 @@
-# gist2localmd
+# gist2local
 
-Export the github gists of specified user to a local markdown files with GitHub api 3.  
+Export the github gists of specified user to a local files with GitHub api 3.  
 I had used github gist to personal memos, snippets, but I don't necessary it for me.  
 Because, 1.extra version history each kind of memos, snippets.  
 2. private gist is not private completely. 3.not speedy for edit,search and sync.  
@@ -24,8 +24,8 @@ curl -s https://api.github.com/users/$target_user/gists
 ## Useage
 
 ```bash
-git clone https://github.com/kis9a/gist2localmd.git
-bash ./gist2localmd.bash $auth_user $target_user
+git clone https://github.com/kis9a/gist2local.git
+bash ./gist2local.bash $auth_user $target_user
 ```
 
 ## Reference

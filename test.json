@@ -1,6 +1,0 @@
-{
-  "ObjectID": [0, 1, 2, 3, 4],
-  "Name": ["Apple", "Orange", "Grape", "Banana", "Jackfruit"],
-  "Color": ["Red", "Orange", "Green", "Yellow", "null"],
-  "Acidity": [3.9, 3.5, 2.99, 6, 5.0]
-}

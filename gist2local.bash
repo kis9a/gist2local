@@ -2,7 +2,7 @@
 
 ##############################################################
 # Author: kis9a <kis9ax@gmail.com>                           #
-# Info: https://github.com/kis9a/gist2localmd#gist2localmd   #
+# Info: https://github.com/kis9a/gist2local#gist2local   #
 # Template: https://github.com/kis9a/bashtemplate            #
 # License: MIT                                               #
 ##############################################################
@@ -102,13 +102,13 @@ showhelp() {
   echo "  -h: Shows this help text."
   echo " "
   echo " Examples:"
-  echo "   bash gist2localmd -h"
-  echo "   bash gist2localmd -d"
-  echo "   bash gist2localmd.bash kis9a kis9a"
+  echo "   bash gist2local -h"
+  echo "   bash gist2local -d"
+  echo "   bash gist2local.bash kis9a kis9a"
   echo ""
   echo " Info:"
   echo "  ./README.md"
-  echo "  https://github.com/kis9a/gist2localmd#gist2localmd "
+  echo "  https://github.com/kis9a/gist2local#gist2local "
   echo ""
 }
 
@@ -172,7 +172,11 @@ get_user_gists_json() {
   fi
 }
 
-gist_to_local_markdown() {
+gist_to_local() {
+
+  # TODO
+  # clone with git
+  # filetype filleter
 
   ## set output directory
   rm -rf "$gists_output_directory"
@@ -188,6 +192,7 @@ gist_to_local_markdown() {
 
   # parse to array of file_objs
   gist_file_objs=$(echo "$gists" | jq ".[] .files|to_entries[]|.value" | jq -s)
+  echo $gist_file_objs
 
   # download with curl by get filename and raw_url
   for num in $( seq 1 "$(echo "$gist_file_objs" | jq length)"); do
@@ -195,13 +200,13 @@ gist_to_local_markdown() {
     raw_url=$(echo "$gist_file_objs" | jq -r .["$num]|.raw_url")
 
     echo "$raw_url" "$gists_output_directory"/"$filename"
-    curl -s "$raw_url" -o "$gists_output_directory"/"$filename".md
+    curl -s "$raw_url" -o "$gists_output_directory"/"$filename"
   done
 }
 
 main() {
   get_user_gists_json "$1" "$2"
-  gist_to_local_markdown
+  gist_to_local
 }
 
 main "$1" "$2"

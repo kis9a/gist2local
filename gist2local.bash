@@ -150,9 +150,7 @@ get_user_gists_json() {
       showhelp
       err "First argument 'auth_user' is not supplied"
       exit 1
-    fi
-
-    if [ -z "$2" ]; then
+    elif [ -z "$2" ]; then
       showhelp
       err "Second arguments 'target_user' is not supplied"
       exit 1

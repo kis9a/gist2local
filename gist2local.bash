@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-##############################################################
-# Author: kis9a <kis9ax@gmail.com>                           #
-# Info: https://github.com/kis9a/gist2local#gist2local   #
-# Template: https://github.com/kis9a/bashtemplate            #
-# License: MIT                                               #
-##############################################################
-
 # --- Template --- {{{
 # color pallet
 readonly cf="\\033[0m"
@@ -32,6 +25,7 @@ err() {
 err_die() {
   local _date
   _date=$(showdate)
+  blank_line
   echo -e "[$_date][${red}ERROR${cf}]: $1 -> use -h parameter for help." 1>&2
   echo -e "[$_date][${red}ERROR${cf}]: Cleaning & Exiting."
   if [[ "$2" == "1" ]]; then
@@ -128,124 +122,157 @@ while getopts ":hd" o; do
             ;;
     esac
 done
-
-is_exists() {
-    which "$1" >/dev/null 2>&1
-    return $?
-}
 #}}}
 
-# set initialize variables
+#|*******************************************|
+#|* gist2local.bash                         *|
+#|* Author: kis9a <kis9ax@gmail.com>        *|
+#|* Github: <https://github.com/gist2local> *|
+#|* License: MIT                            *|
+#|*******************************************|
 
-is_debug=false
-gists_json_file="./gists.json"
-gists_output_directory='./gists'
+blank_line() {
+  echo ''
+}
 
-check_argsments() {
-    # check arguments
-    if [ -z "$1" ]; then
-      showhelp
-      err "First argument 'auth_user' is not supplied"
-      exit 1
-    elif [ -z "$2" ]; then
-      showhelp
-      err "Second arguments 'target_user' is not supplied"
+is_exists() {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+is_exists_directory() {
+  if [ -d "$1" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_exists_file() {
+  if [ -e "$1" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_exists_file_in_directory() {
+  if [ -n "$(ls -A "$1")" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+check_argments() {
+  if [ -z "$auth_user" ]; then
+    showhelp
+    err "argument 'auth_user' is required"
+    exit 1
+  elif [ -z "$target_user" ]; then
+    showhelp
+    err "arguments 'target_user' is required"
+    exit 1
+  fi
+}
+
+check_required_commands() {
+  local command
+  for command in "${required_commands[@]}"; do
+    if is_exists "${command}"; then
+      info "✓ ${command}"
+    else
+      err "${command} is installed?"
       exit 1
     fi
+  done
 }
 
 set_dir() {
-  if [ ! -d  "$1" ]; then
+  if ! is_exists_directory "$1"; then
     mkdir "$1"
   else
-    if [ -n "$(ls -A "$1")" ]; then
+    if is_exists_file_in_directory "$1"; then
       warn "exit files in '$1' directory. Delete ?"
       read -r -n1 -p "ok? (Y/N): " yn
       if [[ $yn = [yY] ]]; then
-        rm -rf "$1"
-        mkdir "$1"
-        echo ''
-        succ "set '$1' directory"
+        rm -rf "$1" && mkdir "$1"
+        blank_line && succ "set '$1' directory"
       else
-        echo ''
-        err "Can't set '$1' directory"
-        exit
+        blank_line && err "Can't set '$1' directory"
+        exit 0
       fi
     fi
   fi
 }
 
-get_user_gists_json() {
-  if $is_debug; then
-      : # write your debug code
-  else
-    check_argsments "$1" "$2"
-    # check is exit curl command
-    if is_exists "curl"; then
-      curl -s -u "$1" https://api.github.com/users/"$2"/gists -o $gists_json_file
-    else
-      err "required: curl command. installed?"
-      info "https://github.com/curl/curl"
-      exit
+set_gists_json_file() {
+  if ! is_exists_file "$gists_json_file"; then
+    warn "exit files '$gists_json_file'. Download new source ?"
+    read -r -n1 -p "ok? (Y/N): " yn
+    if [[ $yn = [yY] ]]; then
+      blank_line
+      rm -f "$gists_json_file"
+      info "deleted $gists_json_file file"
+      curl "-#" -u "$auth_user" https://api.github.com/users/"$target_user"/gists -o "$gists_json_file"
+      info "downloaded new $gists_json_file file"
     fi
+  fi
 
-    # check isexit outputed file
-    if [ -e "$gists_json_file" ]; then
-      succ 'Created user gists json file'
-    else
-      err "Can't created user gist json file"
-      exit
-    fi
+  if is_exists_file "$gists_json_file"; then
+    succ 'completed set gists json file'
   fi
 }
 
-set_gist_file_obj() {
-  # check isexit and read json file
-  if [ -e $gists_json_file ]; then
+set_gist_file_array() {
+  if [ -e "$gists_json_file" ]; then
     gists=$(jq "." < "$gists_json_file")
   else
     err "can't source gist json file"
     exit
   fi
-
   # parse to array of file_objs
-  gist_file_objs=$(echo "$gists" | jq ".[] .files|to_entries[]|.value" | jq -s)
+  readonly gist_file_array=$(echo "$gists" | jq ".[] .files|to_entries[]|.value" | jq -s)
 }
 
 download_gists() {
-  # check is exit jq command
-  if is_exists "jq"; then
-    # download with curl and output files
-    for num in $( seq 1 "$(echo "$gist_file_objs" | jq length)"); do
-      filename=$(echo "$gist_file_objs" | jq -r .["$num]|.filename")
-      raw_url=$(echo "$gist_file_objs" | jq -r .["$num]|.raw_url")
-      curl "-#" "$raw_url" -o "$gists_output_directory"/"$filename"
-    done
-  else
-    err "required: curl command. installed?"
-    info "https://github.com/stedolan/jq"
-    exit;
+  local num
+  local filename
+  local raw_url
+
+  for num in $( seq 1 "$(echo "$gist_file_array" | jq length)"); do
+    filename=$(echo "$gist_file_array" | jq -r .["$num]|.filename")
+    raw_url=$(echo "$gist_file_array" | jq -r .["$num]|.raw_url")
+    curl "-#" "$raw_url" -o "$gists_output_directory"/"$filename"
+  done
+
+  if is_exists_file_in_directory "$gists_output_directory"; then
+    succ "Success download gists!"
+    info "ckeck '$gists_output_directory' directory!"
   fi
-  # check file exits in output directory and message
-  if [ -n "$(ls -A "$gists_output_directory")" ]; then
-    succ "Success download files!"
-    succ "check '$gists_output_directory' directory"
-  fi
+}
+
+preset() {
+  readonly is_debug=false
+  readonly gists_json_file="./$2_gists.json"
+  readonly gists_output_directory="./$2_gists"
+  readonly required_commands=("curl" "jq")
+  readonly auth_user="$1"
+  readonly target_user="$2"
+
+  check_argments
+  check_required_commands
 }
 
 gist_to_local() {
-  if $is_debug; then
-    : # write your debug code
-  else
-    ## configure output directory
-    set_dir "$gists_output_directory"
-    set_gist_file_obj
-    download_gists
-  fi
+  set_gists_json_file
+  set_dir "$gists_output_directory"
+  set_gist_file_array
+  download_gists
 }
 
 main() {
-  get_user_gists_json "$1" "$2"
+  preset "$1" "$2"
   gist_to_local
 }
 

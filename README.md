@@ -11,15 +11,15 @@ So migration to [kis9a/notes](https://github.com/kis9a/notes/tree/master/memos) 
 **In short**
 
 ```sh
-curl -s https://api.github.com/users/$target_user/gists
-  | grep \"raw_url\" | awk '{print $2}'
-  | sed -e 's/"//g' -e 's/,//g' | xargs -n1 curl -O
+curl -s https://api.github.com/users/$target_user/gists \
+  | grep \"raw_url\" | awk '{print $2}' \
+  | sed -e 's/"//g' -e 's/,//g' | xargs curl -I {} curl '{}' -# -O
 ```
 
 ## Required
 
-- \*[stedolan/jq](https://github.com/stedolan/jq): Command-line JSON processor
-- [curl/curl](https://github.com/curl/curl): Command-line tool and library for transferring data with URL syntax
+- [curl/curl](https://github.com/curl/curl)
+- \*[stedolan/jq](https://github.com/stedolan/jq)
 
 ## Useage
 
@@ -27,8 +27,8 @@ curl -s https://api.github.com/users/$target_user/gists
 git clone https://github.com/kis9a/gist2local.git
 bash ./gist2local.bash $auth_user $target_user
 ```
-![Gist2local image](https://user-images.githubusercontent.com/65019715/107136616-5c2dcf80-6948-11eb-9702-47df2dbc7f16.gif)
 
+![Gist2local image](https://user-images.githubusercontent.com/65019715/107136616-5c2dcf80-6948-11eb-9702-47df2dbc7f16.gif)
 
 ## Reference
 
@@ -46,11 +46,9 @@ bash ./gist2local.bash $auth_user $target_user
 
 #### Development used
 
-- **template**
-  - <https://github.com/lfkdev/bashtemplate>
-- **guide**
-  - <https://gnu.org/savannah-checkouts/gnu/bash/manual/bash.html>
-  - <https://github.com/google/styleguide/blob/gh-pages/shellguide.md>
-- **shellcheck tools**
-  - <https://github.com/iamcco/coc-diagnostic>
-  - <https://github.com/koalaman/shellcheck>
+- <https://github.com/lfkdev/bashtemplate>
+- <https://gnu.org/savannah-checkouts/gnu/bash/manual/bash.html>
+- <https://github.com/google/styleguide/blob/gh-pages/shellguide.md>
+- <https://github.com/iamcco/coc-diagnostic>
+- <https://github.com/josa42/coc-sh>
+- <https://github.com/koalaman/shellcheck>

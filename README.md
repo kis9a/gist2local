@@ -27,6 +27,8 @@ curl -s https://api.github.com/users/$target_user/gists
 git clone https://github.com/kis9a/gist2local.git
 bash ./gist2local.bash $auth_user $target_user
 ```
+![Gist2local image](https://user-images.githubusercontent.com/65019715/107136616-5c2dcf80-6948-11eb-9702-47df2dbc7f16.gif)
+
 
 ## Reference
 

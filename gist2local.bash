@@ -141,7 +141,7 @@ is_exists() {
 }
 
 is_exists_directory() {
-  if [ -d "$1" ]; then
+  if [[ -d "$1" ]]; then
     return 0
   else
     return 1
@@ -149,7 +149,7 @@ is_exists_directory() {
 }
 
 is_exists_file() {
-  if [ -e "$1" ]; then
+  if [[ -e "$1" ]]; then
     return 0
   else
     return 1
@@ -157,7 +157,7 @@ is_exists_file() {
 }
 
 is_exists_file_in_directory() {
-  if [ -n "$(ls -A "$1")" ]; then
+  if [[ -n "$(ls -A "$1")" ]]; then
     return 0
   else
     return 1
@@ -165,11 +165,11 @@ is_exists_file_in_directory() {
 }
 
 check_argments() {
-  if [ -z "$auth_user" ]; then
+  if [[ -z "$auth_user" ]]; then
     showhelp
     err "argument 'auth_user' is required"
     exit 1
-  elif [ -z "$target_user" ]; then
+  elif [[ -z "$target_user" ]]; then
     showhelp
     err "arguments 'target_user' is required"
     exit 1
@@ -225,7 +225,7 @@ set_gists_json_file() {
 }
 
 set_gist_file_array() {
-  if [ -e "$gists_json_file" ]; then
+  if [[ -e "$gists_json_file" ]]; then
     gists=$(jq "." < "$gists_json_file")
   else
     err "can't source gist json file"
